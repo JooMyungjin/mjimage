@@ -221,31 +221,66 @@
       color: #555;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       text-align: center;
     }
-    #result-img {
-      width: 100%;
-      border-radius: 16px;
-      display: block;
-      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
-    #download-btn {
-      display: block;
+    .result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .result-item img {
       width: 100%;
-      margin-top: 14px;
-      padding: 14px;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+    .result-item .prompt-label {
+      font-size: 11px;
+      color: #888;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .result-item .dl-btn {
+      padding: 10px;
       background: #f0f0ee;
       color: #1a1a1a;
       border: none;
-      border-radius: 12px;
-      font-size: 14px;
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: background .2s;
       text-align: center;
     }
-    #download-btn:hover { background: #e6e6e2; }
+    .result-item .dl-btn:hover { background: #e6e6e2; }
+    .result-item .generating {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      background: #f7f7f5;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #aaa;
+    }
+    .result-item .gen-error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      background: #fff5f5;
+      border-radius: 12px;
+      font-size: 11px;
+      color: #e04040;
+      padding: 12px;
+      text-align: center;
+    }
 
     /* Spinner */
     .spinner {
@@ -311,15 +346,22 @@
   <!-- Result -->
   <div id="result-wrap">
     <h2>생성된 설정샷</h2>
-    <img id="result-img" src="" alt="생성된 이미지" />
-    <button id="download-btn" onclick="downloadImage()">이미지 다운로드</button>
+    <div class="result-grid" id="result-grid"></div>
   </div>
 
 <script>
-  const PROMPT = "1:1비율 이미지로 한국 화장품 연출 이미지 제작해줘, 심플하고 클린한 느낌으로 제작해줘";
+  // ✏️ 공통 프롬프트 — 4개 모두에 기본 적용
+  const COMMON_PROMPT = "1:1비율 이미지로 한국 화장품 연출 이미지 제작, 제품 이미지는 최대한 손상없이";
+
+  // ✏️ 프롬프트 4개 — 여기에 입력해주세요
+  const PROMPTS = [
+    "Create a premium skincare product shot using the provided product image. Place the product at the center with a clean white or soft gradient background. Add soft natural lighting, subtle shadows, and a luxurious atmosphere. Include minimal props such as water droplets or light reflections. The product must remain sharp and realistic, with high-end commercial photography style.",
+    "심플하고 클린한 느낌",
+    "Create a natural and soothing skincare scene using the provided product image. Place the product on a clean surface with soft natural elements like leaves, herbs, or water. Use warm natural lighting and a calm, minimal background. Emphasize gentle, safe, and dermatological skincare feeling.",
+    "Create a high-impact skincare advertisement focusing on product effectiveness. Use the provided product image and add glowing effects, light beams, or skin texture-inspired background. The scene should feel scientific and result-driven. Keep the product as the main focus, sharp and realistic, with a clean and modern composition.",
+  ];
 
   let uploadedFile = null;
-  let resultDataUrl = null;
   let currentModel = 'gemini-2.5-flash-image';
 
   async function loadModels() {
@@ -436,78 +478,99 @@
     el.className = isError ? 'error' : '';
   }
 
+  async function callGemini(apiKey, prompt, base64, mimeType) {
+    const body = {
+      contents: [{
+        parts: [
+          { text: prompt },
+          { inline_data: { mime_type: mimeType, data: base64 } }
+        ]
+      }],
+      generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
+    };
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+    );
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const imgPart = parts.find(p =>
+      p.inlineData?.mimeType?.startsWith('image/') ||
+      p.inline_data?.mime_type?.startsWith('image/')
+    );
+    if (!imgPart) {
+      const reason = data.candidates?.[0]?.finishReason || '';
+      const textPart = parts.find(p => p.text);
+      throw new Error(
+        `이미지 없음` +
+        (reason ? ` (${reason})` : '') +
+        (textPart?.text ? `: ${textPart.text.slice(0, 100)}` : '')
+      );
+    }
+    const inlineData = imgPart.inlineData || imgPart.inline_data;
+    return `data:${inlineData.mimeType || inlineData.mime_type};base64,${inlineData.data}`;
+  }
+
   async function generate() {
     const apiKey = document.getElementById('api-key').value.trim();
     if (!apiKey || !uploadedFile) return;
 
     const btn = document.getElementById('generate-btn');
     btn.disabled = true;
-    document.getElementById('result-wrap').style.display = 'none';
-    setStatus('<span class="spinner"></span> 이미지 생성 중... (10~30초 소요)');
 
-    try {
-      // Convert image to base64
-      const base64 = await fileToBase64(uploadedFile);
-      const mimeType = uploadedFile.type;
+    // 결과 영역 초기화 — 각 슬롯에 로딩 표시
+    const grid = document.getElementById('result-grid');
+    grid.innerHTML = PROMPTS.map((p, i) => `
+      <div class="result-item" id="slot-${i}">
+        <div class="generating"><span class="spinner"></span> 생성 중...</div>
+        <div class="prompt-label">${p.slice(0, 40)}${p.length > 40 ? '…' : ''}</div>
+      </div>
+    `).join('');
+    document.getElementById('result-wrap').style.display = 'block';
+    setStatus('<span class="spinner"></span> 이미지 4장 생성 중...');
 
-      const body = {
-        contents: [{
-          parts: [
-            { text: PROMPT },
-            { inline_data: { mime_type: mimeType, data: base64 } }
-          ]
-        }],
-        generationConfig: {
-          responseModalities: ["IMAGE", "TEXT"]
-        }
-      };
+    const base64 = await fileToBase64(uploadedFile);
+    const mimeType = uploadedFile.type;
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        }
-      );
+    let doneCount = 0;
+    const results = await Promise.allSettled(
+      PROMPTS.map((prompt, i) =>
+        callGemini(apiKey, COMMON_PROMPT + '\n' + prompt, base64, mimeType).then(imgSrc => {
+          // 완료된 슬롯 즉시 업데이트
+          const slot = document.getElementById(`slot-${i}`);
+          slot.innerHTML = `
+            <img src="${imgSrc}" alt="결과 ${i+1}" />
+            <div class="prompt-label">${prompt.slice(0, 40)}${prompt.length > 40 ? '…' : ''}</div>
+            <button class="dl-btn" onclick="downloadImage('${imgSrc}', ${i+1})">다운로드</button>
+          `;
+          doneCount++;
+          setStatus(`<span class="spinner"></span> ${doneCount} / ${PROMPTS.length} 완료...`);
+          return imgSrc;
+        }).catch(err => {
+          const slot = document.getElementById(`slot-${i}`);
+          slot.innerHTML = `
+            <div class="gen-error">오류: ${err.message}</div>
+            <div class="prompt-label">${prompt.slice(0, 40)}${prompt.length > 40 ? '…' : ''}</div>
+          `;
+          doneCount++;
+          setStatus(`<span class="spinner"></span> ${doneCount} / ${PROMPTS.length} 완료...`);
+          throw err;
+        })
+      )
+    );
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message || `HTTP ${res.status}`);
-      }
+    const successCount = results.filter(r => r.status === 'fulfilled').length;
+    setStatus(successCount === PROMPTS.length
+      ? '✓ 4장 모두 생성 완료!'
+      : `✓ ${successCount}장 완료 (${PROMPTS.length - successCount}장 실패)`
+    , successCount === 0);
 
-      const data = await res.json();
-      const parts = data.candidates?.[0]?.content?.parts || [];
-      // Gemini REST API 응답은 camelCase(inlineData/mimeType)로 옴
-      const imgPart = parts.find(p =>
-        p.inlineData?.mimeType?.startsWith('image/') ||
-        p.inline_data?.mime_type?.startsWith('image/')
-      );
-      const textPart = parts.find(p => p.text);
-
-      if (!imgPart) {
-        const reason = data.candidates?.[0]?.finishReason || '';
-        const msg = textPart?.text || '';
-        throw new Error(
-          `이미지 생성 미지원 모델입니다.\n` +
-          (reason ? `종료 이유: ${reason}\n` : '') +
-          (msg ? `모델 응답: ${msg.slice(0, 200)}` : '이미지 파트가 응답에 없습니다.')
-        );
-      }
-
-      const inlineData = imgPart.inlineData || imgPart.inline_data;
-      const imgSrc = `data:${inlineData.mimeType || inlineData.mime_type};base64,${inlineData.data}`;
-      resultDataUrl = imgSrc;
-
-      document.getElementById('result-img').src = imgSrc;
-      document.getElementById('result-wrap').style.display = 'block';
-      setStatus('✓ 생성 완료!');
-    } catch (e) {
-      setStatus('오류: ' + e.message, true);
-    } finally {
-      btn.disabled = false;
-      updateBtn();
-    }
+    btn.disabled = false;
+    updateBtn();
   }
 
   function fileToBase64(file) {
@@ -519,11 +582,10 @@
     });
   }
 
-  function downloadImage() {
-    if (!resultDataUrl) return;
+  function downloadImage(src, index) {
     const a = document.createElement('a');
-    a.href = resultDataUrl;
-    a.download = `mjimage_${Date.now()}.png`;
+    a.href = src;
+    a.download = `mjimage_${index}_${Date.now()}.png`;
     a.click();
   }
 </script>
