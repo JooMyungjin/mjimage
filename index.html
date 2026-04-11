@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MJ Image — 화장품 설정샷 생성기</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: #f7f7f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    header p {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+    }
+
+    .card label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+
+    /* API Key */
+    .api-row {
+      display: flex;
+      gap: 8px;
+    }
+    .api-row input {
+      flex: 1;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+      font-family: monospace;
+      background: #fafafa;
+    }
+    .api-row input:focus { border-color: #aaa; background: #fff; }
+    .api-row button {
+      border: none;
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity .2s;
+    }
+    .api-row button:hover { opacity: .8; }
+
+    #model-section { margin-top: 16px; }
+    #check-models-btn {
+      width: 100%;
+      padding: 10px;
+      background: #f0f0ee;
+      color: #555;
+      border: none;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #check-models-btn:hover { background: #e6e6e2; }
+    #model-list {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 12px;
+      background: #fafafa;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: none;
+    }
+    #model-list .model-item {
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0ee;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    #model-list .model-item:last-child { border-bottom: none; }
+    #model-list .model-item:hover { color: #000; }
+    #model-list .model-id { font-family: monospace; color: #333; }
+    #model-list .select-tag {
+      margin-left: auto;
+      font-size: 11px;
+      color: #888;
+      background: #eee;
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+    #current-model {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #888;
+    }
+    #current-model span { font-family: monospace; color: #333; font-weight: 600; }
+
+    /* Drop zone */
+    .dropzone {
+      border: 2px dashed #ddd;
+      border-radius: 14px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .dropzone:hover, .dropzone.drag-over {
+      border-color: #aaa;
+      background: #fafafa;
+    }
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .dropzone .icon { font-size: 32px; margin-bottom: 10px; }
+    .dropzone .hint { font-size: 13px; color: #999; line-height: 1.6; }
+    .dropzone .hint strong { color: #555; font-weight: 600; }
+
+    #preview-wrap {
+      display: none;
+      margin-top: 16px;
+      position: relative;
+    }
+    #preview-wrap img {
+      width: 100%;
+      border-radius: 12px;
+      display: block;
+    }
+    #preview-wrap button.remove {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 28px; height: 28px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Generate button */
+    #generate-btn {
+      width: 100%;
+      max-width: 480px;
+      padding: 16px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+      margin-bottom: 20px;
+    }
+    #generate-btn:disabled { opacity: .4; cursor: not-allowed; }
+    #generate-btn:not(:disabled):hover { opacity: .85; }
+
+    /* Status */
+    #status {
+      font-size: 13px;
+      color: #888;
+      text-align: center;
+      min-height: 20px;
+      margin-bottom: 24px;
+    }
+    #status.error { color: #e04040; }
+
+    /* Result */
+    #result-wrap {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+    }
+    #result-wrap h2 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    #result-img {
+      width: 100%;
+      border-radius: 16px;
+      display: block;
+      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+    }
+    #download-btn {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      background: #f0f0ee;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      text-align: center;
+    }
+    #download-btn:hover { background: #e6e6e2; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #ccc;
+      border-top-color: #555;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>화장품 설정샷 생성기</h1>
+    <p>제품 이미지를 업로드하면 클린한 연출 이미지를 만들어드려요</p>
+  </header>
+
+  <!-- API Key -->
+  <div class="card">
+    <label>Google AI Studio API Key</label>
+    <div class="api-row">
+      <input type="password" id="api-key" placeholder="AIza..." autocomplete="off" />
+      <button onclick="saveKey()">저장</button>
+    </div>
+  </div>
+
+  <!-- Model selector -->
+  <div class="card">
+    <label>모델 선택</label>
+    <div id="current-model">현재 모델: <span id="current-model-name">gemini-2.5-flash-image</span></div>
+    <div id="model-section">
+      <button id="check-models-btn" onclick="loadModels()" style="margin-top:10px">사용 가능한 모델 목록 불러오기</button>
+      <div id="model-list"></div>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="card">
+    <label>화장품 이미지 업로드</label>
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="file-input" accept="image/*" />
+      <div class="icon">📷</div>
+      <div class="hint">
+        <strong>클릭하거나 드래그</strong>해서 이미지를 올려주세요<br/>
+        JPG, PNG, WEBP 지원
+      </div>
+    </div>
+    <div id="preview-wrap">
+      <img id="preview-img" src="" alt="미리보기" />
+      <button class="remove" onclick="removeImage()">✕</button>
+    </div>
+  </div>
+
+  <button id="generate-btn" disabled onclick="generate()">설정샷 생성하기</button>
+
+  <div id="status"></div>
+
+  <!-- Result -->
+  <div id="result-wrap">
+    <h2>생성된 설정샷</h2>
+    <img id="result-img" src="" alt="생성된 이미지" />
+    <button id="download-btn" onclick="downloadImage()">이미지 다운로드</button>
+  </div>
+
+<script>
+  const PROMPT = "1:1비율 이미지로 한국 화장품 연출 이미지 제작해줘, 심플하고 클린한 느낌으로 제작해줘";
+
+  let uploadedFile = null;
+  let resultDataUrl = null;
+  let currentModel = 'gemini-2.5-flash-image';
+
+  async function loadModels() {
+    const apiKey = document.getElementById('api-key').value.trim();
+    if (!apiKey) { setStatus('먼저 API 키를 입력해주세요.', true); return; }
+
+    const btn = document.getElementById('check-models-btn');
+    btn.textContent = '불러오는 중...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'API 오류');
+
+      const allModels = (data.models || []).filter(m => {
+        const id = m.name.replace('models/', '');
+        return (m.supportedGenerationMethods || []).includes('generateContent') &&
+               (id.includes('image') || id.includes('imagen'));
+      });
+
+      const listEl = document.getElementById('model-list');
+      listEl.style.display = 'block';
+
+      if (allModels.length === 0) {
+        listEl.innerHTML = '<div style="color:#888;padding:8px 0">사용 가능한 이미지 생성 모델이 없습니다.</div>';
+      } else {
+        listEl.innerHTML = allModels.map(m => {
+          const id = m.name.replace('models/', '');
+          const displayName = m.displayName || '';
+          return `<div class="model-item" onclick="selectModel('${id}')">
+            <span class="model-id">${id}</span>
+            ${displayName ? `<span style="font-size:11px;color:#888">(${displayName})</span>` : ''}
+            <span class="select-tag" style="background:#e8f5e9;color:#2e7d32">이미지</span>
+          </div>`;
+        }).join('');
+      }
+    } catch(e) {
+      setStatus('모델 목록 오류: ' + e.message, true);
+    } finally {
+      btn.textContent = '새로고침';
+      btn.disabled = false;
+    }
+  }
+
+  function selectModel(modelId) {
+    currentModel = modelId;
+    document.getElementById('current-model-name').textContent = modelId;
+    document.getElementById('model-list').style.display = 'none';
+    document.getElementById('check-models-btn').textContent = '사용 가능한 모델 목록 불러오기';
+    setStatus(`모델 선택됨: ${modelId}`);
+  }
+
+  // Restore saved key
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('mj_api_key');
+    if (saved) document.getElementById('api-key').value = saved;
+    updateBtn();
+  });
+
+  function saveKey() {
+    const key = document.getElementById('api-key').value.trim();
+    if (!key) return;
+    localStorage.setItem('mj_api_key', key);
+    setStatus('API 키가 저장되었습니다.', false);
+    updateBtn();
+  }
+
+  function updateBtn() {
+    const hasKey = document.getElementById('api-key').value.trim().length > 0;
+    document.getElementById('generate-btn').disabled = !(hasKey && uploadedFile);
+  }
+
+  document.getElementById('api-key').addEventListener('input', updateBtn);
+
+  // Drag & drop
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) loadFile(f);
+  });
+
+  document.getElementById('file-input').addEventListener('change', e => {
+    if (e.target.files[0]) loadFile(e.target.files[0]);
+  });
+
+  function loadFile(file) {
+    uploadedFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('preview-img').src = ev.target.result;
+      document.getElementById('preview-wrap').style.display = 'block';
+      dz.style.display = 'none';
+      updateBtn();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage() {
+    uploadedFile = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('preview-wrap').style.display = 'none';
+    dz.style.display = 'block';
+    updateBtn();
+  }
+
+  function setStatus(msg, isError = false) {
+    const el = document.getElementById('status');
+    el.innerHTML = msg;
+    el.className = isError ? 'error' : '';
+  }
+
+  async function generate() {
+    const apiKey = document.getElementById('api-key').value.trim();
+    if (!apiKey || !uploadedFile) return;
+
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    document.getElementById('result-wrap').style.display = 'none';
+    setStatus('<span class="spinner"></span> 이미지 생성 중... (10~30초 소요)');
+
+    try {
+      // Convert image to base64
+      const base64 = await fileToBase64(uploadedFile);
+      const mimeType = uploadedFile.type;
+
+      const body = {
+        contents: [{
+          parts: [
+            { text: PROMPT },
+            { inline_data: { mime_type: mimeType, data: base64 } }
+          ]
+        }],
+        generationConfig: {
+          responseModalities: ["IMAGE", "TEXT"]
+        }
+      };
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const parts = data.candidates?.[0]?.content?.parts || [];
+      // Gemini REST API 응답은 camelCase(inlineData/mimeType)로 옴
+      const imgPart = parts.find(p =>
+        p.inlineData?.mimeType?.startsWith('image/') ||
+        p.inline_data?.mime_type?.startsWith('image/')
+      );
+      const textPart = parts.find(p => p.text);
+
+      if (!imgPart) {
+        const reason = data.candidates?.[0]?.finishReason || '';
+        const msg = textPart?.text || '';
+        throw new Error(
+          `이미지 생성 미지원 모델입니다.\n` +
+          (reason ? `종료 이유: ${reason}\n` : '') +
+          (msg ? `모델 응답: ${msg.slice(0, 200)}` : '이미지 파트가 응답에 없습니다.')
+        );
+      }
+
+      const inlineData = imgPart.inlineData || imgPart.inline_data;
+      const imgSrc = `data:${inlineData.mimeType || inlineData.mime_type};base64,${inlineData.data}`;
+      resultDataUrl = imgSrc;
+
+      document.getElementById('result-img').src = imgSrc;
+      document.getElementById('result-wrap').style.display = 'block';
+      setStatus('✓ 생성 완료!');
+    } catch (e) {
+      setStatus('오류: ' + e.message, true);
+    } finally {
+      btn.disabled = false;
+      updateBtn();
+    }
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function downloadImage() {
+    if (!resultDataUrl) return;
+    const a = document.createElement('a');
+    a.href = resultDataUrl;
+    a.download = `mjimage_${Date.now()}.png`;
+    a.click();
+  }
+</script>
+</body>
+</html>
