@@ -22,16 +22,8 @@
       text-align: center;
       margin-bottom: 48px;
     }
-    header h1 {
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: -0.3px;
-    }
-    header p {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #888;
-    }
+    header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+    header p { margin-top: 8px; font-size: 13px; color: #888; }
 
     .card {
       background: #fff;
@@ -42,8 +34,7 @@
       box-shadow: 0 1px 4px rgba(0,0,0,.06);
       margin-bottom: 20px;
     }
-
-    .card label {
+    .card > label {
       display: block;
       font-size: 12px;
       font-weight: 600;
@@ -54,10 +45,7 @@
     }
 
     /* API Key */
-    .api-row {
-      display: flex;
-      gap: 8px;
-    }
+    .api-row { display: flex; gap: 8px; }
     .api-row input {
       flex: 1;
       border: 1.5px solid #e5e5e5;
@@ -83,117 +71,210 @@
     }
     .api-row button:hover { opacity: .8; }
 
+    /* Model */
     #model-section { margin-top: 16px; }
     #check-models-btn {
-      width: 100%;
-      padding: 10px;
-      background: #f0f0ee;
-      color: #555;
-      border: none;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
+      width: 100%; padding: 10px;
+      background: #f0f0ee; color: #555;
+      border: none; border-radius: 10px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background .2s;
     }
     #check-models-btn:hover { background: #e6e6e2; }
     #model-list {
-      margin-top: 10px;
-      max-height: 200px;
-      overflow-y: auto;
-      font-size: 12px;
-      background: #fafafa;
-      border: 1.5px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 10px 12px;
-      display: none;
+      margin-top: 10px; max-height: 200px; overflow-y: auto;
+      font-size: 12px; background: #fafafa;
+      border: 1.5px solid #e5e5e5; border-radius: 10px;
+      padding: 10px 12px; display: none;
     }
     #model-list .model-item {
-      padding: 6px 0;
-      border-bottom: 1px solid #f0f0ee;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
+      padding: 6px 0; border-bottom: 1px solid #f0f0ee;
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
     }
     #model-list .model-item:last-child { border-bottom: none; }
     #model-list .model-item:hover { color: #000; }
     #model-list .model-id { font-family: monospace; color: #333; }
     #model-list .select-tag {
-      margin-left: auto;
-      font-size: 11px;
-      color: #888;
-      background: #eee;
-      padding: 2px 7px;
-      border-radius: 6px;
+      margin-left: auto; font-size: 11px; color: #888;
+      background: #eee; padding: 2px 7px; border-radius: 6px;
     }
-    #current-model {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #888;
-    }
+    #current-model { margin-top: 10px; font-size: 12px; color: #888; }
     #current-model span { font-family: monospace; color: #333; font-weight: 600; }
+
+    /* Common prompt */
+    .common-prompt-area {
+      width: 100%;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 60px;
+      outline: none;
+      background: #fafafa;
+      color: #333;
+      transition: border-color .2s;
+      line-height: 1.5;
+    }
+    .common-prompt-area:focus { border-color: #aaa; background: #fff; }
+
+    /* Prompt list */
+    .prompt-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .prompt-list-header > label { margin-bottom: 0; }
+    .select-all-btn {
+      font-size: 11px; color: #888;
+      background: none; border: none;
+      cursor: pointer; padding: 2px 6px;
+      border-radius: 6px;
+      transition: background .15s;
+    }
+    .select-all-btn:hover { background: #f0f0ee; color: #333; }
+
+    #prompt-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .prompt-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 10px;
+      background: #fafafa;
+      transition: border-color .2s;
+    }
+    .prompt-item:has(.prompt-cb:checked) { border-color: #c8c8c8; background: #fff; }
+
+    .prompt-cb {
+      margin-top: 2px;
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: #1a1a1a;
+    }
+
+    .prompt-text {
+      flex: 1;
+      font-size: 12px;
+      color: #333;
+      line-height: 1.5;
+      word-break: break-all;
+      cursor: pointer;
+    }
+    .prompt-text.collapsed {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .prompt-edit-area {
+      flex: 1;
+      border: 1.5px solid #aaa;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+      outline: none;
+      background: #fff;
+      line-height: 1.5;
+    }
+
+    .prompt-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .prompt-actions button {
+      border: none;
+      background: #f0f0ee;
+      color: #555;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .prompt-actions button:hover { background: #e0e0dc; }
+    .prompt-actions button.del { color: #e04040; }
+    .prompt-actions button.del:hover { background: #ffe5e5; }
+    .prompt-actions button.save { color: #1a1a1a; font-weight: 600; }
+
+    /* Add prompt */
+    .add-prompt-area {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .add-prompt-area textarea {
+      width: 100%;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 72px;
+      outline: none;
+      background: #fafafa;
+      transition: border-color .2s;
+      line-height: 1.5;
+    }
+    .add-prompt-area textarea:focus { border-color: #aaa; background: #fff; }
+    .add-prompt-area button {
+      align-self: flex-end;
+      border: none;
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 10px;
+      padding: 9px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .add-prompt-area button:hover { opacity: .8; }
 
     /* Drop zone */
     .dropzone {
-      border: 2px dashed #ddd;
-      border-radius: 14px;
-      padding: 40px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
+      border: 2px dashed #ddd; border-radius: 14px;
+      padding: 40px 20px; text-align: center;
+      cursor: pointer; transition: border-color .2s, background .2s;
       position: relative;
     }
-    .dropzone:hover, .dropzone.drag-over {
-      border-color: #aaa;
-      background: #fafafa;
-    }
-    .dropzone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
+    .dropzone:hover, .dropzone.drag-over { border-color: #aaa; background: #fafafa; }
+    .dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
     .dropzone .icon { font-size: 32px; margin-bottom: 10px; }
     .dropzone .hint { font-size: 13px; color: #999; line-height: 1.6; }
     .dropzone .hint strong { color: #555; font-weight: 600; }
 
-    #preview-wrap {
-      display: none;
-      margin-top: 16px;
-      position: relative;
-    }
-    #preview-wrap img {
-      width: 100%;
-      border-radius: 12px;
-      display: block;
-    }
+    #preview-wrap { display: none; margin-top: 16px; position: relative; }
+    #preview-wrap img { width: 100%; border-radius: 12px; display: block; }
     #preview-wrap button.remove {
-      position: absolute;
-      top: 8px; right: 8px;
-      background: rgba(0,0,0,.55);
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 28px; height: 28px;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(0,0,0,.55); color: #fff;
+      border: none; border-radius: 50%;
+      width: 28px; height: 28px; font-size: 14px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
 
     /* Generate button */
     #generate-btn {
-      width: 100%;
-      max-width: 480px;
-      padding: 16px;
-      background: #1a1a1a;
-      color: #fff;
-      border: none;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity .2s;
+      width: 100%; max-width: 480px;
+      padding: 16px; background: #1a1a1a; color: #fff;
+      border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity .2s;
       margin-bottom: 20px;
     }
     #generate-btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -201,122 +282,57 @@
 
     /* Status */
     #status {
-      font-size: 13px;
-      color: #888;
-      text-align: center;
-      min-height: 20px;
-      margin-bottom: 24px;
+      font-size: 13px; color: #888;
+      text-align: center; min-height: 20px; margin-bottom: 24px;
     }
     #status.error { color: #e04040; }
 
     /* Result */
-    #result-wrap {
-      display: none;
-      width: 100%;
-      max-width: 480px;
-    }
+    #result-wrap { display: none; width: 100%; max-width: 480px; }
     #result-wrap h2 {
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 16px;
-      text-align: center;
+      font-size: 13px; font-weight: 600; color: #555;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 16px; text-align: center;
     }
     .result-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    .result-item {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .result-grid.single { grid-template-columns: 1fr; }
+    .result-item { display: flex; flex-direction: column; gap: 8px; }
     .result-item img {
-      width: 100%;
-      border-radius: 12px;
-      display: block;
+      width: 100%; border-radius: 12px; display: block;
       box-shadow: 0 4px 16px rgba(0,0,0,.1);
     }
     .result-item .prompt-label {
-      font-size: 11px;
-      color: #888;
-      text-align: center;
-      line-height: 1.4;
+      font-size: 11px; color: #888; text-align: center; line-height: 1.4;
     }
     .result-item .dl-btn {
-      padding: 10px;
-      background: #f0f0ee;
-      color: #1a1a1a;
-      border: none;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
-      text-align: center;
+      padding: 10px; background: #f0f0ee; color: #1a1a1a;
+      border: none; border-radius: 10px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background .2s; text-align: center;
     }
     .result-item .dl-btn:hover { background: #e6e6e2; }
     .result-item .generating {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 180px;
-      background: #f7f7f5;
-      border-radius: 12px;
-      font-size: 12px;
-      color: #aaa;
+      display: flex; align-items: center; justify-content: center;
+      height: 180px; background: #f7f7f5;
+      border-radius: 12px; font-size: 12px; color: #aaa;
     }
     .result-item .gen-error {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 180px;
-      background: #fff5f5;
-      border-radius: 12px;
-      font-size: 11px;
-      color: #e04040;
-      padding: 12px;
-      text-align: center;
-    }
-
-    /* Group selector */
-    .group-selector {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .group-btn {
-      padding: 12px 8px;
-      background: #f0f0ee;
-      color: #555;
-      border: 2px solid transparent;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .2s;
-      text-align: center;
-    }
-    .group-btn:hover { background: #e6e6e2; }
-    .group-btn.active {
-      background: #1a1a1a;
-      color: #fff;
-      border-color: #1a1a1a;
+      display: flex; align-items: center; justify-content: center;
+      height: 180px; background: #fff5f5;
+      border-radius: 12px; font-size: 11px; color: #e04040;
+      padding: 12px; text-align: center;
     }
 
     /* Spinner */
     .spinner {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid #ccc;
-      border-top-color: #555;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #ccc; border-top-color: #555;
+      border-radius: 50%; animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -347,6 +363,23 @@
     </div>
   </div>
 
+  <!-- Prompt manager -->
+  <div class="card">
+    <label>공통 프롬프트</label>
+    <textarea id="common-prompt" class="common-prompt-area" placeholder="모든 프롬프트에 공통 적용되는 내용을 입력하세요"></textarea>
+
+    <div class="prompt-list-header" style="margin-top:20px">
+      <label style="margin-bottom:0">프롬프트 목록</label>
+      <button class="select-all-btn" onclick="toggleSelectAll()">전체 선택/해제</button>
+    </div>
+    <div id="prompt-list"></div>
+
+    <div class="add-prompt-area">
+      <textarea id="new-prompt-input" placeholder="새 프롬프트를 입력하세요..."></textarea>
+      <button onclick="addPrompt()">추가</button>
+    </div>
+  </div>
+
   <!-- Upload -->
   <div class="card">
     <label>화장품 이미지 업로드</label>
@@ -364,12 +397,6 @@
     </div>
   </div>
 
-  <!-- Group selector -->
-  <div class="card">
-    <label>프롬프트 그룹 선택</label>
-    <div class="group-selector" id="group-selector"></div>
-  </div>
-
   <button id="generate-btn" disabled onclick="generate()">설정샷 생성하기</button>
 
   <div id="status"></div>
@@ -381,76 +408,185 @@
   </div>
 
 <script>
-  // ✏️ 공통 프롬프트 — 모든 그룹/프롬프트에 기본 적용
-  const COMMON_PROMPT = "1:1비율 이미지로 한국 화장품 연출 이미지 제작, 제품 이미지는 최대한 손상없이";
+  // ── 기본 데이터 ──────────────────────────────────────────
+  const DEFAULT_COMMON = "1:1비율 이미지로 한국 화장품 연출 이미지 제작, 제품 이미지는 최대한 손상없이";
 
-  // ✏️ 프롬프트 그룹 4개 (그룹당 프롬프트 4개)
-  const PROMPT_GROUPS = [
-    {
-      name: "FACE",
-      prompts: [
-        "A graceful female hand holding a glass dropper over a clear skincare ampoule bottle, dropping clear liquid, minimalist aesthetic, clean white background, soft studio lighting, water reflection, macro product photography, high key lighting, simple and pure, highly detailed, 8k, photorealistic, (clean and simple:1.2)",
-        "A delicate female hand gently holding a luxury skincare serum bottle, resting on a clean white marble surface, pristine and minimal, soft morning sunlight, natural shadow, product showcase, clean aesthetic, empty space, 85mm lens, masterpiece, ultra-detailed",
-        "A premium cosmetic glass jar with a sleek minimalist design, placed on an exposed textured grey marble surface. Clean neutral background, soft studio lighting with gentle highlights, sophisticated, elegant, modern luxury skincare vibe, commercial macro photography, hyper-detailed, 8k, --ar 1:1 --style raw --v 6.0",
-        "A minimalist cosmetic skincare bottle with a blank white label, resting on a clean white marble block with subtle grey veins. Soft natural sunlight filtering through a window, creating elegant and soft shadows. Bright and airy atmosphere, simple, luxurious, high-end commercial product photography, empty space for text, photorealistic, 8k, --ar 1:1 --style raw --v 6.0",
-      ]
-    },
-    {
-      name: "HAND",
-      prompts: [
-        "프롬프트 2-1",
-        "프롬프트 2-2",
-        "프롬프트 2-3",
-        "프롬프트 2-4",
-      ]
-    },
-    {
-      name: "MASK",
-      prompts: [
-        "프롬프트 3-1",
-        "프롬프트 3-2",
-        "프롬프트 3-3",
-        "프롬프트 3-4",
-      ]
-    },
-    {
-      name: "그룹 4",
-      prompts: [
-        "프롬프트 4-1",
-        "프롬프트 4-2",
-        "프롬프트 4-3",
-        "프롬프트 4-4",
-      ]
-    },
+  const DEFAULT_PROMPTS_TEXT = [
+    "A graceful female hand holding a glass dropper over a clear skincare ampoule bottle, dropping clear liquid, minimalist aesthetic, clean white background, soft studio lighting, water reflection, macro product photography, high key lighting, simple and pure, highly detailed, 8k, photorealistic, (clean and simple:1.2)",
+    "A delicate female hand gently holding a luxury skincare serum bottle, resting on a clean white marble surface, pristine and minimal, soft morning sunlight, natural shadow, product showcase, clean aesthetic, empty space, 85mm lens, masterpiece, ultra-detailed",
+    "A premium cosmetic glass jar with a sleek minimalist design, placed on an exposed textured grey marble surface. Clean neutral background, soft studio lighting with gentle highlights, sophisticated, elegant, modern luxury skincare vibe, commercial macro photography, hyper-detailed, 8k, --ar 1:1 --style raw --v 6.0",
+    "A minimalist cosmetic skincare bottle with a blank white label, resting on a clean white marble block with subtle grey veins. Soft natural sunlight filtering through a window, creating elegant and soft shadows. Bright and airy atmosphere, simple, luxurious, high-end commercial product photography, empty space for text, photorealistic, 8k, --ar 1:1 --style raw --v 6.0",
   ];
 
-  let selectedGroup = 0;
-
+  // ── 상태 ─────────────────────────────────────────────────
+  let promptList = [];  // { id, text, checked }
+  let nextId = 1;
   let uploadedFile = null;
   let currentModel = 'gemini-2.5-flash-image';
+  const resultImages = new Map(); // slot index → data URL
 
+  // ── 프롬프트 저장/불러오기 ────────────────────────────────
+  function savePrompts() {
+    localStorage.setItem('mj_prompts', JSON.stringify({ list: promptList, nextId }));
+    localStorage.setItem('mj_common_prompt', document.getElementById('common-prompt').value);
+  }
+
+  function loadPrompts() {
+    const saved = localStorage.getItem('mj_prompts');
+    if (saved) {
+      const data = JSON.parse(saved);
+      promptList = data.list;
+      nextId = data.nextId;
+    } else {
+      promptList = DEFAULT_PROMPTS_TEXT.map((text, i) => ({ id: i + 1, text, checked: true }));
+      nextId = DEFAULT_PROMPTS_TEXT.length + 1;
+    }
+    const savedCommon = localStorage.getItem('mj_common_prompt');
+    document.getElementById('common-prompt').value = savedCommon ?? DEFAULT_COMMON;
+  }
+
+  // ── 프롬프트 목록 렌더링 ──────────────────────────────────
+  function renderPromptList() {
+    const el = document.getElementById('prompt-list');
+    if (promptList.length === 0) {
+      el.innerHTML = '<div style="font-size:12px;color:#aaa;text-align:center;padding:16px 0">프롬프트가 없습니다</div>';
+      updateBtn();
+      return;
+    }
+    el.innerHTML = promptList.map(p => `
+      <div class="prompt-item" id="pi-${p.id}">
+        <input type="checkbox" class="prompt-cb" ${p.checked ? 'checked' : ''}
+          onchange="togglePrompt(${p.id})" />
+        <span class="prompt-text collapsed" onclick="toggleExpand(this)">${escHtml(p.text)}</span>
+        <div class="prompt-actions">
+          <button onclick="startEdit(${p.id})">수정</button>
+          <button class="del" onclick="deletePrompt(${p.id})">삭제</button>
+        </div>
+      </div>
+    `).join('');
+    updateBtn();
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toggleExpand(el) {
+    el.classList.toggle('collapsed');
+  }
+
+  // ── 프롬프트 조작 ─────────────────────────────────────────
+  function togglePrompt(id) {
+    const p = promptList.find(p => p.id === id);
+    if (p) p.checked = !p.checked;
+    savePrompts();
+    updateBtn();
+  }
+
+  function toggleSelectAll() {
+    const anyUnchecked = promptList.some(p => !p.checked);
+    promptList.forEach(p => p.checked = anyUnchecked);
+    savePrompts();
+    renderPromptList();
+  }
+
+  function deletePrompt(id) {
+    promptList = promptList.filter(p => p.id !== id);
+    savePrompts();
+    renderPromptList();
+  }
+
+  function addPrompt() {
+    const input = document.getElementById('new-prompt-input');
+    const text = input.value.trim();
+    if (!text) return;
+    promptList.push({ id: nextId++, text, checked: true });
+    input.value = '';
+    savePrompts();
+    renderPromptList();
+  }
+
+  function startEdit(id) {
+    const p = promptList.find(p => p.id === id);
+    if (!p) return;
+    const item = document.getElementById(`pi-${id}`);
+    item.innerHTML = `
+      <input type="checkbox" class="prompt-cb" ${p.checked ? 'checked' : ''} disabled />
+      <textarea class="prompt-edit-area">${escHtml(p.text)}</textarea>
+      <div class="prompt-actions">
+        <button class="save" onclick="saveEdit(${id})">저장</button>
+        <button onclick="renderPromptList()">취소</button>
+      </div>
+    `;
+  }
+
+  function saveEdit(id) {
+    const p = promptList.find(p => p.id === id);
+    if (!p) return;
+    const ta = document.querySelector(`#pi-${id} .prompt-edit-area`);
+    const text = ta.value.trim();
+    if (!text) return;
+    p.text = text;
+    savePrompts();
+    renderPromptList();
+  }
+
+  // Enter키로 프롬프트 추가
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('new-prompt-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addPrompt();
+    });
+
+    // 공통 프롬프트 자동 저장
+    document.getElementById('common-prompt').addEventListener('input', savePrompts);
+  });
+
+  // ── updateBtn ─────────────────────────────────────────────
+  function updateBtn() {
+    const hasKey = document.getElementById('api-key').value.trim().length > 0;
+    const checkedCount = promptList.filter(p => p.checked).length;
+    const btn = document.getElementById('generate-btn');
+    const ok = hasKey && uploadedFile && checkedCount > 0;
+    btn.disabled = !ok;
+    btn.textContent = ok ? `설정샷 생성하기 (${checkedCount}장)` : '설정샷 생성하기';
+  }
+
+  // ── API Key ───────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('mj_api_key');
+    if (saved) document.getElementById('api-key').value = saved;
+    loadPrompts();
+    renderPromptList();
+    updateBtn();
+  });
+
+  function saveKey() {
+    const key = document.getElementById('api-key').value.trim();
+    if (!key) return;
+    localStorage.setItem('mj_api_key', key);
+    setStatus('API 키가 저장되었습니다.');
+    updateBtn();
+  }
+
+  document.getElementById('api-key').addEventListener('input', updateBtn);
+
+  // ── Model ─────────────────────────────────────────────────
   async function loadModels() {
     const apiKey = document.getElementById('api-key').value.trim();
     if (!apiKey) { setStatus('먼저 API 키를 입력해주세요.', true); return; }
-
     const btn = document.getElementById('check-models-btn');
-    btn.textContent = '불러오는 중...';
-    btn.disabled = true;
-
+    btn.textContent = '불러오는 중...'; btn.disabled = true;
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error?.message || 'API 오류');
-
       const allModels = (data.models || []).filter(m => {
         const id = m.name.replace('models/', '');
         return (m.supportedGenerationMethods || []).includes('generateContent') &&
                (id.includes('image') || id.includes('imagen'));
       });
-
       const listEl = document.getElementById('model-list');
       listEl.style.display = 'block';
-
       if (allModels.length === 0) {
         listEl.innerHTML = '<div style="color:#888;padding:8px 0">사용 가능한 이미지 생성 모델이 없습니다.</div>';
       } else {
@@ -467,8 +603,7 @@
     } catch(e) {
       setStatus('모델 목록 오류: ' + e.message, true);
     } finally {
-      btn.textContent = '새로고침';
-      btn.disabled = false;
+      btn.textContent = '새로고침'; btn.disabled = false;
     }
   }
 
@@ -480,52 +615,15 @@
     setStatus(`모델 선택됨: ${modelId}`);
   }
 
-  function renderGroups() {
-    const container = document.getElementById('group-selector');
-    container.innerHTML = PROMPT_GROUPS.map((g, i) => `
-      <button class="group-btn ${i === selectedGroup ? 'active' : ''}" onclick="selectGroup(${i})">${g.name}</button>
-    `).join('');
-  }
-
-  function selectGroup(index) {
-    selectedGroup = index;
-    renderGroups();
-  }
-
-  // Restore saved key
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('mj_api_key');
-    if (saved) document.getElementById('api-key').value = saved;
-    renderGroups();
-    updateBtn();
-  });
-
-  function saveKey() {
-    const key = document.getElementById('api-key').value.trim();
-    if (!key) return;
-    localStorage.setItem('mj_api_key', key);
-    setStatus('API 키가 저장되었습니다.', false);
-    updateBtn();
-  }
-
-  function updateBtn() {
-    const hasKey = document.getElementById('api-key').value.trim().length > 0;
-    document.getElementById('generate-btn').disabled = !(hasKey && uploadedFile);
-  }
-
-  document.getElementById('api-key').addEventListener('input', updateBtn);
-
-  // Drag & drop
+  // ── Upload ────────────────────────────────────────────────
   const dz = document.getElementById('dropzone');
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
   dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('drag-over');
+    e.preventDefault(); dz.classList.remove('drag-over');
     const f = e.dataTransfer.files[0];
     if (f && f.type.startsWith('image/')) loadFile(f);
   });
-
   document.getElementById('file-input').addEventListener('change', e => {
     if (e.target.files[0]) loadFile(e.target.files[0]);
   });
@@ -550,20 +648,20 @@
     updateBtn();
   }
 
+  // ── Status ────────────────────────────────────────────────
   function setStatus(msg, isError = false) {
     const el = document.getElementById('status');
     el.innerHTML = msg;
     el.className = isError ? 'error' : '';
   }
 
+  // ── Gemini API ────────────────────────────────────────────
   async function callGemini(apiKey, prompt, base64, mimeType) {
     const body = {
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inline_data: { mime_type: mimeType, data: base64 } }
-        ]
-      }],
+      contents: [{ parts: [
+        { text: prompt },
+        { inline_data: { mime_type: mimeType, data: base64 } }
+      ]}],
       generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
     };
     const res = await fetch(
@@ -593,62 +691,67 @@
     return `data:${inlineData.mimeType || inlineData.mime_type};base64,${inlineData.data}`;
   }
 
+  // ── Generate ──────────────────────────────────────────────
   async function generate() {
     const apiKey = document.getElementById('api-key').value.trim();
     if (!apiKey || !uploadedFile) return;
 
+    const selected = promptList.filter(p => p.checked);
+    if (selected.length === 0) return;
+
+    const commonPrompt = document.getElementById('common-prompt').value.trim();
     const btn = document.getElementById('generate-btn');
     btn.disabled = true;
+    resultImages.clear();
 
-    const PROMPTS = PROMPT_GROUPS[selectedGroup].prompts;
-
-    // 결과 영역 초기화 — 각 슬롯에 로딩 표시
     const grid = document.getElementById('result-grid');
-    grid.innerHTML = PROMPTS.map((p, i) => `
+    grid.className = 'result-grid' + (selected.length === 1 ? ' single' : '');
+    grid.innerHTML = selected.map((p, i) => `
       <div class="result-item" id="slot-${i}">
         <div class="generating"><span class="spinner"></span> 생성 중...</div>
-        <div class="prompt-label">${p.slice(0, 40)}${p.length > 40 ? '…' : ''}</div>
+        <div class="prompt-label">${escHtml(p.text.slice(0, 40))}${p.text.length > 40 ? '…' : ''}</div>
       </div>
     `).join('');
     document.getElementById('result-wrap').style.display = 'block';
-    setStatus('<span class="spinner"></span> 이미지 4장 생성 중...');
+    setStatus(`<span class="spinner"></span> 이미지 ${selected.length}장 생성 중...`);
 
     const base64 = await fileToBase64(uploadedFile);
     const mimeType = uploadedFile.type;
 
     let doneCount = 0;
     const results = await Promise.allSettled(
-      PROMPTS.map((prompt, i) =>
-        callGemini(apiKey, COMMON_PROMPT + '\n' + prompt, base64, mimeType).then(imgSrc => {
-          // 완료된 슬롯 즉시 업데이트
-          const slot = document.getElementById(`slot-${i}`);
-          slot.innerHTML = `
-            <img src="${imgSrc}" alt="결과 ${i+1}" />
-            <div class="prompt-label">${prompt.slice(0, 40)}${prompt.length > 40 ? '…' : ''}</div>
-            <button class="dl-btn" onclick="downloadImage('${imgSrc}', ${i+1})">다운로드</button>
-          `;
-          doneCount++;
-          setStatus(`<span class="spinner"></span> ${doneCount} / ${PROMPTS.length} 완료...`);
-          return imgSrc;
-        }).catch(err => {
-          const slot = document.getElementById(`slot-${i}`);
-          slot.innerHTML = `
-            <div class="gen-error">오류: ${err.message}</div>
-            <div class="prompt-label">${prompt.slice(0, 40)}${prompt.length > 40 ? '…' : ''}</div>
-          `;
-          doneCount++;
-          setStatus(`<span class="spinner"></span> ${doneCount} / ${PROMPTS.length} 완료...`);
-          throw err;
-        })
-      )
+      selected.map((p, i) => {
+        const fullPrompt = commonPrompt ? commonPrompt + '\n' + p.text : p.text;
+        return callGemini(apiKey, fullPrompt, base64, mimeType)
+          .then(imgSrc => {
+            resultImages.set(i, imgSrc);
+            document.getElementById(`slot-${i}`).innerHTML = `
+              <img src="${imgSrc}" alt="결과 ${i+1}" />
+              <div class="prompt-label">${escHtml(p.text.slice(0, 40))}${p.text.length > 40 ? '…' : ''}</div>
+              <button class="dl-btn" onclick="downloadImage(${i}, ${i+1})">다운로드</button>
+            `;
+            doneCount++;
+            setStatus(`<span class="spinner"></span> ${doneCount} / ${selected.length} 완료...`);
+          })
+          .catch(err => {
+            document.getElementById(`slot-${i}`).innerHTML = `
+              <div class="gen-error">오류: ${escHtml(err.message)}</div>
+              <div class="prompt-label">${escHtml(p.text.slice(0, 40))}${p.text.length > 40 ? '…' : ''}</div>
+            `;
+            doneCount++;
+            setStatus(`<span class="spinner"></span> ${doneCount} / ${selected.length} 완료...`);
+            throw err;
+          });
+      })
     );
 
     const successCount = results.filter(r => r.status === 'fulfilled').length;
-    setStatus(successCount === PROMPTS.length
-      ? '✓ 4장 모두 생성 완료!'
-      : `✓ ${successCount}장 완료 (${PROMPTS.length - successCount}장 실패)`
-    , successCount === 0);
-
+    setStatus(
+      successCount === selected.length
+        ? `✓ ${successCount}장 모두 생성 완료!`
+        : `✓ ${successCount}장 완료 (${selected.length - successCount}장 실패)`,
+      successCount === 0
+    );
     btn.disabled = false;
     updateBtn();
   }
@@ -662,10 +765,12 @@
     });
   }
 
-  function downloadImage(src, index) {
+  function downloadImage(slotIndex, label) {
+    const src = resultImages.get(slotIndex);
+    if (!src) return;
     const a = document.createElement('a');
     a.href = src;
-    a.download = `mjimage_${index}_${Date.now()}.png`;
+    a.download = `mjimage_${label}_${Date.now()}.png`;
     a.click();
   }
 </script>
