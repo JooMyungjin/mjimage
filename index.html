@@ -194,6 +194,52 @@
       line-height: 1.5;
     }
 
+    .prompt-thumb {
+      width: 44px; height: 44px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+      cursor: zoom-in;
+      border: 1.5px solid #e5e5e5;
+      transition: opacity .15s;
+    }
+    .prompt-thumb:hover { opacity: .75; }
+    .prompt-thumb-empty {
+      width: 44px; height: 44px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      border: 1.5px dashed #ccc;
+      background: #f7f7f5;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      font-size: 18px;
+      color: #ccc;
+    }
+    .prompt-thumb-empty:hover { border-color: #999; background: #f0f0ee; color: #999; }
+
+    /* 라이트박스 */
+    #lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.82);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img {
+      max-width: 92vw; max-height: 92vh;
+      border-radius: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.5);
+    }
+    #lightbox-close {
+      position: absolute; top: 18px; right: 22px;
+      color: #fff; font-size: 28px; cursor: pointer;
+      line-height: 1; opacity: .8;
+    }
+    #lightbox-close:hover { opacity: 1; }
+
     .prompt-actions {
       display: flex;
       flex-direction: column;
@@ -440,6 +486,15 @@
 
   <div id="status"></div>
 
+  <!-- 썸네일 업로드용 숨김 input -->
+  <input type="file" id="thumb-file-input" accept="image/*" style="display:none" />
+
+  <!-- 라이트박스 -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <span id="lightbox-close">&times;</span>
+    <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()" />
+  </div>
+
   <!-- Result -->
   <div id="result-wrap">
     <h2>생성된 설정샷</h2>
@@ -451,10 +506,11 @@
   const DEFAULT_COMMON = "1:1비율 이미지로 한국 화장품 연출 이미지 제작, 제품 이미지는 최대한 손상없이";
 
   const DEFAULT_PROMPTS_TEXT = [
-    { title: "드로퍼 앰플", text: "A graceful female hand holding a glass dropper over a clear skincare ampoule bottle, dropping clear liquid, minimalist aesthetic, clean white background, soft studio lighting, water reflection, macro product photography, high key lighting, simple and pure, highly detailed, 8k, photorealistic, (clean and simple:1.2)" },
-    { title: "세럼 대리석", text: "A delicate female hand gently holding a luxury skincare serum bottle, resting on a clean white marble surface, pristine and minimal, soft morning sunlight, natural shadow, product showcase, clean aesthetic, empty space, 85mm lens, masterpiece, ultra-detailed" },
-    { title: "유리 항아리", text: "A premium cosmetic glass jar with a sleek minimalist design, placed on an exposed textured grey marble surface. Clean neutral background, soft studio lighting with gentle highlights, sophisticated, elegant, modern luxury skincare vibe, commercial macro photography, hyper-detailed, 8k, --ar 1:1 --style raw --v 6.0" },
-    { title: "미니멀 스킨케어", text: "A minimalist cosmetic skincare bottle with a blank white label, resting on a clean white marble block with subtle grey veins. Soft natural sunlight filtering through a window, creating elegant and soft shadows. Bright and airy atmosphere, simple, luxurious, high-end commercial product photography, empty space for text, photorealistic, 8k, --ar 1:1 --style raw --v 6.0" },
+    { title: "드로퍼 앰플", img: "img/1.png", text: "A graceful female hand holding a glass dropper over a clear skincare ampoule bottle, dropping clear liquid, minimalist aesthetic, clean white background, soft studio lighting, water reflection, macro product photography, high key lighting, simple and pure, highly detailed, 8k, photorealistic, (clean and simple:1.2)" },
+    { title: "세럼 대리석", img: "img/2.png", text: "A delicate female hand gently holding a luxury skincare serum bottle, resting on a clean white marble surface, pristine and minimal, soft morning sunlight, natural shadow, product showcase, clean aesthetic, empty space, 85mm lens, masterpiece, ultra-detailed" },
+    { title: "유리 항아리", img: "img/3.png", text: "A premium cosmetic glass jar with a sleek minimalist design, placed on an exposed textured grey marble surface. Clean neutral background, soft studio lighting with gentle highlights, sophisticated, elegant, modern luxury skincare vibe, commercial macro photography, hyper-detailed, 8k, --ar 1:1 --style raw --v 6.0" },
+    { title: "미니멀 스킨케어", img: "img/4.png", text: "A minimalist cosmetic skincare bottle with a blank white label, resting on a clean white marble block with subtle grey veins. Soft natural sunlight filtering through a window, creating elegant and soft shadows. Bright and airy atmosphere, simple, luxurious, high-end commercial product photography, empty space for text, photorealistic, 8k, --ar 1:1 --style raw --v 6.0" },
+    { title: "허브 잎", img: "img/5.png", text: "Create a natural and soothing skincare scene using the provided product image. Place the product on a clean surface with soft natural elements like leaves, herbs, or water. Use warm natural lighting and a calm, minimal background. Emphasize gentle, safe, and dermatological skincare feeling."},
   ];
 
   // ── 상태 ─────────────────────────────────────────────────
@@ -476,14 +532,22 @@
     const saved = localStorage.getItem('mj_prompts');
     if (saved) {
       const data = JSON.parse(saved);
-      if ((data.v ?? 1) >= PROMPTS_VERSION) {
-        promptList = data.list.map(p => ({ title: '', ...p }));
-        nextId = data.nextId;
-      } else {
-        // 구버전 데이터 → 기본값으로 재초기화
-        promptList = DEFAULT_PROMPTS_TEXT.map((p, i) => ({ id: i + 1, title: p.title ?? '', text: p.text, checked: true }));
-        nextId = DEFAULT_PROMPTS_TEXT.length + 1;
-      }
+      // 구버전(v1)도 title: '' 붙여서 마이그레이션, 데이터 버리지 않음
+      promptList = data.list.map(p => ({ title: '', img: '', ...p }));
+      nextId = data.nextId;
+      // DEFAULT_PROMPTS_TEXT에 새 항목 추가되거나 img 필드 추가되면 자동 반영
+      let added = false;
+      DEFAULT_PROMPTS_TEXT.forEach(def => {
+        const existing = promptList.find(p => p.text === def.text);
+        if (!existing) {
+          promptList.push({ id: nextId++, title: def.title ?? '', img: def.img ?? '', text: def.text, checked: true });
+          added = true;
+        } else if (!existing.img && def.img) {
+          existing.img = def.img;
+          added = true;
+        }
+      });
+      if (added) savePrompts();
     } else {
       promptList = DEFAULT_PROMPTS_TEXT.map((p, i) => ({ id: i + 1, title: p.title ?? '', text: p.text, checked: true }));
       nextId = DEFAULT_PROMPTS_TEXT.length + 1;
@@ -504,6 +568,10 @@
       <div class="prompt-item" id="pi-${p.id}">
         <input type="checkbox" class="prompt-cb" ${p.checked ? 'checked' : ''}
           onchange="togglePrompt(${p.id})" />
+        ${p.img
+          ? `<img class="prompt-thumb" src="${escHtml(p.img)}" alt="" onclick="openLightbox('${escHtml(p.img)}')" />`
+          : `<div class="prompt-thumb-empty" onclick="pickThumb(${p.id})" title="이미지 등록">+</div>`
+        }
         <span class="prompt-text collapsed" onclick="toggleExpand(this)">${p.title ? `<b class="prompt-title" onclick="event.stopPropagation();togglePrompt(${p.id})">${escHtml(p.title)}</b><br>${escHtml(p.text)}` : escHtml(p.text)}</span>
         <div class="prompt-actions">
           <button onclick="startEdit(${p.id})">수정</button>
@@ -780,13 +848,13 @@
     let doneCount = 0;
     const results = await Promise.allSettled(
       selected.map((p, i) => {
-        const fullPrompt = commonPrompt ? commonPrompt + '\n' + p.text : p.text;
+        const fullPrompt = commonPrompt ? p.text + '\n' + commonPrompt : p.text;
         return callGemini(apiKey, fullPrompt, base64, mimeType)
           .then(imgSrc => {
             resultImages.set(i, imgSrc);
             document.getElementById(`slot-${i}`).innerHTML = `
-              <img src="${imgSrc}" alt="결과 ${i+1}" />
-              <div class="prompt-label">${escHtml(p.text.slice(0, 40))}${p.text.length > 40 ? '…' : ''}</div>
+              <img src="${imgSrc}" alt="결과 ${i+1}" onclick="openImageInNewTab(${i})" style="cursor:zoom-in" />
+              <div class="prompt-label">${p.title ? escHtml(p.title) : (escHtml(p.text.slice(0, 40)) + (p.text.length > 40 ? '…' : ''))}</div>
               <button class="dl-btn" onclick="downloadImage(${i}, ${i+1})">다운로드</button>
             `;
             doneCount++;
@@ -795,7 +863,7 @@
           .catch(err => {
             document.getElementById(`slot-${i}`).innerHTML = `
               <div class="gen-error">오류: ${escHtml(err.message)}</div>
-              <div class="prompt-label">${escHtml(p.text.slice(0, 40))}${p.text.length > 40 ? '…' : ''}</div>
+              <div class="prompt-label">${p.title ? escHtml(p.title) : (escHtml(p.text.slice(0, 40)) + (p.text.length > 40 ? '…' : ''))}</div>
             `;
             doneCount++;
             setStatus(`<span class="spinner"></span> ${doneCount} / ${selected.length} 완료...`);
@@ -822,6 +890,47 @@
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  }
+
+  function pickThumb(promptId) {
+    const input = document.getElementById('thumb-file-input');
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const p = promptList.find(p => p.id === promptId);
+        if (!p) return;
+        p.img = ev.target.result;
+        savePrompts();
+        renderPromptList();
+      };
+      reader.readAsDataURL(file);
+      input.value = '';
+    };
+    input.click();
+  }
+
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  function openImageInNewTab(slotIndex) {
+    const src = resultImages.get(slotIndex);
+    if (!src) return;
+    const [header, data] = src.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+    const binary = atob(data);
+    const arr = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+    const blob = new Blob([arr], { type: mime });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 
   function downloadImage(slotIndex, label) {
