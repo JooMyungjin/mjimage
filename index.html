@@ -13,63 +13,87 @@
     <p>제품 이미지를 업로드하면 클린한 연출 이미지를 만들어드려요</p>
   </header>
 
-  <!-- API Key -->
-  <div class="card">
-    <label>Google AI Studio API Key</label>
-    <div class="api-row">
-      <input type="password" id="api-key" placeholder="AIza..." autocomplete="off" />
-      <button onclick="saveKey()">저장</button>
-    </div>
-  </div>
+  <!-- ── 상단 영역: API Key + 모델 선택 ── -->
+  <div class="top-bar">
 
-  <!-- Model selector -->
-  <div class="card">
-    <label>모델 선택</label>
-    <div id="current-model">현재 모델: <span id="current-model-name">gemini-2.5-flash-image</span></div>
-    <div id="model-section">
-      <button id="check-models-btn" onclick="loadModels()" style="margin-top:10px">사용 가능한 모델 목록 불러오기</button>
-      <div id="model-list"></div>
-    </div>
-  </div>
-
-  <!-- Prompt manager -->
-  <div class="card">
-    <label>공통 프롬프트</label>
-    <textarea id="common-prompt" class="common-prompt-area" placeholder="모든 프롬프트에 공통 적용되는 내용을 입력하세요"></textarea>
-
-    <div class="prompt-list-header" style="margin-top:20px">
-      <label style="margin-bottom:0">프롬프트 목록</label>
-      <button class="select-all-btn" onclick="toggleSelectAll()">전체 선택/해제</button>
-    </div>
-    <div id="prompt-list"></div>
-
-    <div class="add-prompt-area">
-      <input type="text" id="new-prompt-title" placeholder="제목 (선택)" />
-      <textarea id="new-prompt-input" placeholder="새 프롬프트를 입력하세요..."></textarea>
-      <button onclick="addPrompt()">추가</button>
-    </div>
-  </div>
-
-  <!-- Upload -->
-  <div class="card">
-    <label>화장품 이미지 업로드</label>
-    <div class="dropzone" id="dropzone">
-      <input type="file" id="file-input" accept="image/*" />
-      <div class="icon">📷</div>
-      <div class="hint">
-        <strong>클릭하거나 드래그</strong>해서 이미지를 올려주세요<br/>
-        JPG, PNG, WEBP 지원
+    <div class="card top-card">
+      <label>Google AI Studio API Key</label>
+      <div class="api-row">
+        <input type="password" id="api-key" placeholder="AIza..." autocomplete="off" />
+        <button onclick="saveKey()">저장</button>
       </div>
     </div>
-    <div id="preview-wrap">
-      <img id="preview-img" src="" alt="미리보기" />
-      <button class="remove" onclick="removeImage()">✕</button>
+
+    <div class="card top-card">
+      <label>모델 선택</label>
+      <div id="current-model">현재 모델: <span id="current-model-name">gemini-2.5-flash-image</span></div>
+      <div id="model-section">
+        <button id="check-models-btn" onclick="loadModels()" style="margin-top:10px">사용 가능한 모델 목록 불러오기</button>
+        <div id="model-list"></div>
+      </div>
     </div>
-  </div>
 
-  <button id="generate-btn" disabled onclick="generate()">설정샷 생성하기</button>
+  </div><!-- /top-bar -->
 
-  <div id="status"></div>
+  <!-- ── 2컬럼 영역 ── -->
+  <div class="layout">
+
+    <!-- 왼쪽: 프롬프트 + 업로드 + 생성 -->
+    <div class="left-panel">
+
+      <div class="card">
+        <label>공통 프롬프트</label>
+        <textarea id="common-prompt" class="common-prompt-area" placeholder="모든 프롬프트에 공통 적용되는 내용을 입력하세요"></textarea>
+
+        <div class="prompt-list-header" style="margin-top:20px">
+          <label style="margin-bottom:0">프롬프트 목록</label>
+          <button class="select-all-btn" onclick="toggleSelectAll()">전체 선택/해제</button>
+        </div>
+        <div id="prompt-list"></div>
+
+        <div class="add-prompt-area">
+          <input type="text" id="new-prompt-title" placeholder="제목 (선택)" />
+          <textarea id="new-prompt-input" placeholder="새 프롬프트를 입력하세요..."></textarea>
+          <button onclick="addPrompt()">추가</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <label>화장품 이미지 업로드</label>
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="file-input" accept="image/*" />
+          <div class="icon">📷</div>
+          <div class="hint">
+            <strong>클릭하거나 드래그</strong>해서 이미지를 올려주세요<br/>
+            JPG, PNG, WEBP 지원
+          </div>
+        </div>
+        <div id="preview-wrap">
+          <img id="preview-img" src="" alt="미리보기" />
+          <button class="remove" onclick="removeImage()">✕</button>
+        </div>
+      </div>
+
+      <button id="generate-btn" disabled onclick="generate()">설정샷 생성하기</button>
+      <div id="status"></div>
+
+    </div><!-- /left-panel -->
+
+    <!-- 오른쪽: 결과 -->
+    <div class="right-panel">
+      <div id="result-wrap">
+        <h2>생성된 설정샷</h2>
+        <div class="result-grid" id="result-grid"></div>
+      </div>
+      <div id="result-placeholder">
+        <div class="placeholder-inner">
+          <div class="placeholder-icon">🖼️</div>
+          <p>설정샷이 여기에 표시됩니다</p>
+        </div>
+      </div>
+    </div><!-- /right-panel -->
+
+  </div><!-- /layout -->
 
   <!-- 썸네일 업로드용 숨김 input -->
   <input type="file" id="thumb-file-input" accept="image/*" style="display:none" />
@@ -78,12 +102,6 @@
   <div id="lightbox" onclick="closeLightbox()">
     <span id="lightbox-close">&times;</span>
     <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()" />
-  </div>
-
-  <!-- Result -->
-  <div id="result-wrap">
-    <h2>생성된 설정샷</h2>
-    <div class="result-grid" id="result-grid"></div>
   </div>
 
   <script src="app.js"></script>

@@ -346,6 +346,8 @@ async function generate() {
     </div>
   `).join('');
   document.getElementById('result-wrap').style.display = 'block';
+  const ph = document.getElementById('result-placeholder');
+  if (ph) ph.style.display = 'none';
   setStatus(`<span class="spinner"></span> 이미지 ${selected.length}장 생성 중...`);
 
   const base64 = await fileToBase64(uploadedFile);

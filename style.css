@@ -8,24 +8,105 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 16px 80px;
+  padding: 40px 16px 80px;
 }
 
 header {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 28px;
+  width: 100%;
+  max-width: 1080px;
 }
 header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
 header p { margin-top: 8px; font-size: 13px; color: #888; }
 
+/* ── 상단 바: API Key + 모델 ── */
+.top-bar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+  gap: 0;
+  margin-bottom: 4px;
+}
+
+@media (min-width: 900px) {
+  .top-bar {
+    flex-direction: row;
+    max-width: 1080px;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .top-card {
+    flex: 1;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* ── 2컬럼 레이아웃 ── */
+.layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 20px;
+}
+
+@media (min-width: 900px) {
+  .layout {
+    flex-direction: row;
+    max-width: 1080px;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .left-panel {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .right-panel {
+    flex: 1 1 0;
+    min-width: 0;
+    position: sticky;
+    top: 24px;
+    align-self: flex-start;
+  }
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.right-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 결과 플레이스홀더 ── */
+#result-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  border: 2px dashed #e0e0dc;
+  border-radius: 20px;
+  background: #fff;
+}
+.placeholder-inner { text-align: center; color: #ccc; }
+.placeholder-icon { font-size: 40px; margin-bottom: 12px; }
+.placeholder-inner p { font-size: 13px; }
+
+/* ── 카드 ── */
 .card {
   background: #fff;
   border-radius: 16px;
-  padding: 28px;
+  padding: 24px 28px;
   width: 100%;
-  max-width: 480px;
   box-shadow: 0 1px 4px rgba(0,0,0,.06);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .card > label {
   display: block;
@@ -65,7 +146,7 @@ header p { margin-top: 8px; font-size: 13px; color: #888; }
 .api-row button:hover { opacity: .8; }
 
 /* Model */
-#model-section { margin-top: 16px; }
+#model-section { margin-top: 12px; }
 #check-models-btn {
   width: 100%; padding: 10px;
   background: #f0f0ee; color: #555;
@@ -91,7 +172,7 @@ header p { margin-top: 8px; font-size: 13px; color: #888; }
   margin-left: auto; font-size: 11px; color: #888;
   background: #eee; padding: 2px 7px; border-radius: 6px;
 }
-#current-model { margin-top: 10px; font-size: 12px; color: #888; }
+#current-model { margin-top: 8px; font-size: 12px; color: #888; }
 #current-model span { font-family: monospace; color: #333; font-weight: 600; }
 
 /* Common prompt */
@@ -347,12 +428,12 @@ header p { margin-top: 8px; font-size: 13px; color: #888; }
 
 /* Generate button */
 #generate-btn {
-  width: 100%; max-width: 480px;
+  width: 100%;
   padding: 16px; background: #1a1a1a; color: #fff;
   border: none; border-radius: 14px;
   font-size: 15px; font-weight: 600;
   cursor: pointer; transition: opacity .2s;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 #generate-btn:disabled { opacity: .4; cursor: not-allowed; }
 #generate-btn:not(:disabled):hover { opacity: .85; }
@@ -360,12 +441,12 @@ header p { margin-top: 8px; font-size: 13px; color: #888; }
 /* Status */
 #status {
   font-size: 13px; color: #888;
-  text-align: center; min-height: 20px; margin-bottom: 24px;
+  text-align: center; min-height: 20px; margin-bottom: 20px;
 }
 #status.error { color: #e04040; }
 
 /* Result */
-#result-wrap { display: none; width: 100%; max-width: 480px; }
+#result-wrap { display: none; width: 100%; }
 #result-wrap h2 {
   font-size: 13px; font-weight: 600; color: #555;
   text-transform: uppercase; letter-spacing: 0.6px;
